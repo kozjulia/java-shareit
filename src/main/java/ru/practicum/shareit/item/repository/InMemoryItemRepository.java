@@ -10,11 +10,9 @@ import ru.practicum.shareit.user.model.User;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@Slf4j
 public class InMemoryItemRepository implements ItemRepository {
 
     Map<Long, List<Item>> items = new HashMap<>();
@@ -65,10 +63,8 @@ public class InMemoryItemRepository implements ItemRepository {
         Item item = getItemById(itemId).orElseThrow(() ->
                 new ItemNotFoundException("Вещь с id = " + itemId + "не найдена."));
         if (!item.getOwner().equals(user)) {
-            String message = String.format("Пользователь с id = " + user.getId() +
-                    " не является владельцем вещи: " + itemDto);
-            log.warn(message);
-            throw new ItemOtherOwnerException(message);
+            throw new ItemOtherOwnerException(String.format("Пользователь с id = " + user.getId() +
+                    " не является владельцем вещи: " + itemDto));
         }
 
         if (itemDto.getName() != null) {

@@ -14,12 +14,10 @@ import java.util.Collections;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
@@ -64,21 +62,10 @@ public class ItemServiceImpl implements ItemService {
 
     private ItemDto validateItemDto(ItemDto itemDto) {
         String message;
-        if (itemDto.getName() == null) {
-            logAndError("Ошибка! Краткое название вещи не может быть пустым.", 20001);
-        }
-        if (itemDto.getDescription() == null) {
-            logAndError("Ошибка! Развёрнутое описание вещи не может быть пустым. ", 20002);
-        }
         if (itemDto.getAvailable() == null) {
-            logAndError("Ошибка! Статус доступности вещи для аренды не может быть пустым.", 20003);
+            throw new ValidationException("Ошибка! Статус доступности вещи для аренды не может быть пустым.", 20001);
         }
         return itemDto;
-    }
-
-    private static void logAndError(String exp, int errorCode) {
-        log.warn(exp + " Код ошибки: " + errorCode);
-        throw new ValidationException(exp, errorCode);
     }
 
 }
