@@ -50,9 +50,10 @@ public class UserController {
         log.debug("Добавлен новый пользователь: {}", userDtoNew);
         // не пойму, почему лог не выводится в консоль =(
         // из всех контроллеров
-        //
-        //
-        //
+        // в файле application.properties
+        // закомментировала строчку
+        // #spring.config.activate.on-profile=ci,test
+        // и только после этого лог из контроллеров пишется. почему так?
         return userDtoNew;
     }
 
