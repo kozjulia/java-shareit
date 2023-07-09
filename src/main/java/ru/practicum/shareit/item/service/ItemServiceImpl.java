@@ -34,25 +34,24 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getItemById(Long itemId) {
-        return itemRepository.getItemDtoById(itemId).
-                orElseThrow(() -> new ItemNotFoundException("Вещь с идентификатором " + itemId + " не найдена."));
+        return itemRepository.getItemDtoById(itemId).orElseThrow(() ->
+                new ItemNotFoundException("Вещь с идентификатором " + itemId + " не найдена."));
     }
 
     @Override
     public ItemDto saveItem(ItemDto itemDto, Long userId) {
         ItemDto itemDtoNew = validateItemDto(itemDto);
         return itemRepository.saveItem(itemDto, userRepository.getUserById(userId).orElseThrow(() ->
-                        new UserNotFoundException("Пользователь с идентификатором " + userId + " не найден."))).
-                orElseThrow(() -> new ItemNotSaveException("Вещь не была создана: " + itemDtoNew));
+                new UserNotFoundException("Пользователь с id = " + userId + " не найден."))).orElseThrow(() ->
+                new ItemNotSaveException("Вещь не была создана: " + itemDtoNew));
     }
 
     @Override
     public ItemDto updateItem(Long itemId, ItemDto itemDto, Long userId) {
         User user = userRepository.getUserById(userId).orElseThrow(() ->
-                new UserNotFoundException("Пользователь с идентификатором " + userId + " не найден."));
-        return itemRepository.updateItem(itemId, itemDto, user).
-                orElseThrow(() -> new ItemNotUpdateException("Вещь с id = " + itemId +
-                        " не была обновлена: " + itemDto));
+                new UserNotFoundException("Пользователь с id = " + userId + " не найден."));
+        return itemRepository.updateItem(itemId, itemDto, user).orElseThrow(() ->
+                new ItemNotUpdateException("Вещь с id = " + itemId + " не была обновлена: " + itemDto));
     }
 
     @Override

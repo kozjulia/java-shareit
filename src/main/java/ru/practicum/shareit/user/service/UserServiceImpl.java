@@ -29,13 +29,18 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserById(Long userId) {
         return userRepository.getUserDtoById(userId).orElseThrow(() ->
                 new UserNotFoundException("Пользователь с идентификатором " + userId + " не найден."));
+        //
+        //
+        // Андрей, в сервисах опциональ я вот так раскрываю, а как сюда еще красиво добавить лог?
+        //
+        //
     }
 
     @Override
     public UserDto saveUser(UserDto userDto) {
         UserDto userDtoNew = validateUserDto(userDto);
-        return userRepository.saveUser(userDtoNew).
-                orElseThrow(() -> new UserNotSaveException("Пользователь не был создан: " + userDtoNew));
+        return userRepository.saveUser(userDtoNew).orElseThrow(() ->
+                new UserNotSaveException("Пользователь не был создан: " + userDtoNew));
     }
 
     @Override
