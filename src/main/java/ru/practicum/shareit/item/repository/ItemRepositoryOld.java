@@ -7,7 +7,7 @@ import ru.practicum.shareit.user.model.User;
 import java.util.List;
 import java.util.Optional;
 
-public interface ItemRepository {
+public interface ItemRepositoryOld {
 
     List<ItemDto> getAllItemsByUser(Long userId);
 
