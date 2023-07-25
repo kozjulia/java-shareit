@@ -35,9 +35,9 @@ public class UserController {
      * Получение пользователя по id
      */
     public ResponseEntity<UserDto> getUserById(@PathVariable Long userId) {
-        UserDto user = userService.getUserById(userId);
+        UserDto userDto = userService.getUserById(userId);
         log.info("Получен пользователь с id = {}", userId);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userDto);
     }
 
     @PostMapping
@@ -46,9 +46,9 @@ public class UserController {
      * Создание пользователя
      */
     public ResponseEntity<UserDto> saveUser(@Valid @RequestBody UserDto userDto) {
-        UserDto userDtoNew = userService.saveUser(userDto);
-        log.info("Добавлен новый пользователь: {}", userDtoNew);
-        return ResponseEntity.ok(userDtoNew);
+        userDto = userService.saveUser(userDto);
+        log.info("Добавлен новый пользователь: {}", userDto);
+        return ResponseEntity.ok(userDto);
     }
 
     @PatchMapping("/{userId}")
@@ -65,9 +65,9 @@ public class UserController {
     /**
      * Удаление пользователя по id
      */
-    public ResponseEntity<Boolean> deleteUserById(@PathVariable Long userId) {
+    public void deleteUserById(@PathVariable Long userId) {
         log.info("Удалён пользователь с id = {}", userId);
-        return ResponseEntity.ok(userService.deleteUserById(userId));
+        userService.deleteUserById(userId);
     }
 
 }

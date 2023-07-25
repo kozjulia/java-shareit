@@ -1,15 +1,26 @@
 package ru.practicum.shareit.user.model;
 
-import lombok.Data;
-import lombok.NonNull;
+import javax.persistence.*;
 
-@Data
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = "users", schema = "public")
+@NoArgsConstructor
+@Getter
+@Setter
 public class User {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // уникальный идентификатор пользователя
-    @NonNull
+
+    @Column(name = "name", nullable = false)
     private String name; // имя или логин пользователя
-    @NonNull
+
+    @Column(name = "email", nullable = false)
     private String email; // адрес электронной почты, уникальный
 
 }
