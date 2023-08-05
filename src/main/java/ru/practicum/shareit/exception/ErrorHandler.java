@@ -20,15 +20,32 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice(assignableTypes = {UserController.class, ItemController.class,
         BookingController.class})
 @Slf4j
 public class ErrorHandler {
 
-    @ExceptionHandler({ValidationException.class, StatusBookingNotFoundException.class})
+    @ExceptionHandler({ValidationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final RuntimeException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMethodArgumentTypeMismatchException(final RuntimeException e) {
+        if (((MethodArgumentTypeMismatchException) e).getName().equals("state")) {
+            String message = "Unknown state: " + ((MethodArgumentTypeMismatchException) e).getValue();
+            log.warn(message);
+            return new ErrorResponse(
+                    message
+            );
+        }
         log.warn(e.getMessage());
         return new ErrorResponse(
                 e.getMessage()
