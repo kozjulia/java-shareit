@@ -4,6 +4,8 @@ import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.booking.exception.*;
 import ru.practicum.shareit.item.exception.*;
 import ru.practicum.shareit.item.ItemController;
+import ru.practicum.shareit.request.ItemRequestController;
+import ru.practicum.shareit.request.exception.ItemRequestNotFoundException;
 import ru.practicum.shareit.user.UserController;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.exception.UserNotSaveException;
@@ -23,7 +25,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice(assignableTypes = {UserController.class, ItemController.class,
-        BookingController.class})
+        BookingController.class, ItemRequestController.class})
 @Slf4j
 public class ErrorHandler {
 
@@ -39,22 +41,22 @@ public class ErrorHandler {
     @ExceptionHandler({MethodArgumentTypeMismatchException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentTypeMismatchException(final RuntimeException e) {
+        String message;
         if (((MethodArgumentTypeMismatchException) e).getName().equals("state")) {
-            String message = "Unknown state: " + ((MethodArgumentTypeMismatchException) e).getValue();
-            log.warn(message);
-            return new ErrorResponse(
-                    message
-            );
+            message = "Unknown state: " + ((MethodArgumentTypeMismatchException) e).getValue();
+        } else {
+            message = e.getMessage();
         }
-        log.warn(e.getMessage());
+        log.warn(message);
         return new ErrorResponse(
-                e.getMessage()
+                message
         );
     }
 
     @ExceptionHandler({UserNotFoundException.class, ItemNotFoundException.class,
             BookingNotFoundException.class, CommentNotSaveException.class,
-            BookingOtherBookerException.class, ItemOtherOwnerException.class})
+            BookingOtherBookerException.class, ItemOtherOwnerException.class,
+            ItemRequestNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final RuntimeException e) {
         log.warn(e.getMessage());

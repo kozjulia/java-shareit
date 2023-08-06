@@ -28,8 +28,10 @@ public class BookingController {
      */
     public ResponseEntity<List<BookingOutDto>> getAllBookingsByUser(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(defaultValue = "ALL") StateBooking state) {
-        List<BookingOutDto> bookingOutDtos = bookingService.getAllBookingsByUser(userId, state);
+            @RequestParam(defaultValue = "ALL") StateBooking state,
+            @RequestParam(defaultValue = "0") Integer from,
+            @RequestParam(defaultValue = "10") Integer size) {
+        List<BookingOutDto> bookingOutDtos = bookingService.getAllBookingsByUser(userId, state, from, size);
         log.info("Получен список всех бронирований текущего пользователя с id = {}, количество = {}.",
                 userId, bookingOutDtos.size());
         return ResponseEntity.ok().body(bookingOutDtos);
@@ -41,8 +43,10 @@ public class BookingController {
      */
     public ResponseEntity<List<BookingOutDto>> getAllBookingsAllItemsByOwner(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(defaultValue = "ALL") StateBooking state) {
-        List<BookingOutDto> bookingOutDtos = bookingService.getAllBookingsAllItemsByOwner(userId, state);
+            @RequestParam(defaultValue = "ALL") StateBooking state,
+            @RequestParam(defaultValue = "0") Integer from,
+            @RequestParam(defaultValue = "10") Integer size) {
+        List<BookingOutDto> bookingOutDtos = bookingService.getAllBookingsAllItemsByOwner(userId, state, from, size);
         log.info("Получен список всех бронирований для всех вещей текущего пользователя с id = {}, " +
                 "количество = {}.", userId, bookingOutDtos.size());
         return ResponseEntity.ok().body(bookingOutDtos);
