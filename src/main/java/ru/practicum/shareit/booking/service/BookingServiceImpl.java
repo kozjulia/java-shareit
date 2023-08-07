@@ -106,8 +106,8 @@ public class BookingServiceImpl implements BookingService {
             case CURRENT:
                 BooleanExpression byStart = QBooking.booking.start.before(LocalDateTime.now());
                 BooleanExpression byEnd = QBooking.booking.end.after(LocalDateTime.now());
-                bookings.addAll(bookingRepository.
-                        findAll(byOwnerId.and(byStart).and(byEnd), page)
+                bookings.addAll(bookingRepository
+                        .findAll(byOwnerId.and(byStart).and(byEnd), page)
                         .getContent());
                 break;
 
