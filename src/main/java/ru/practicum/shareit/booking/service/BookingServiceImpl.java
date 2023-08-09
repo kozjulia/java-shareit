@@ -54,32 +54,32 @@ public class BookingServiceImpl implements BookingService {
         switch (state) {
 
             case ALL:
-                bookings = bookingRepository.findByBookerIdOrderByEndDesc(userId, page).getContent();
+                bookings = bookingRepository.findByBookerIdOrderByEndDesc(userId, page);
                 break;
 
             case CURRENT:
                 bookings = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByEndDesc(
-                        userId, LocalDateTime.now(), LocalDateTime.now(), page).getContent();
+                        userId, LocalDateTime.now(), LocalDateTime.now(), page);
                 break;
 
             case PAST:
                 bookings = bookingRepository.findByBookerIdAndEndIsBefore(userId,
-                        LocalDateTime.now(), pageRequest).getContent();
+                        LocalDateTime.now(), pageRequest);
                 break;
 
             case FUTURE:
                 bookings = bookingRepository.findByBookerIdAndEndIsAfter(userId,
-                        LocalDateTime.now(), pageRequest).getContent();
+                        LocalDateTime.now(), pageRequest);
                 break;
 
             case WAITING:
                 bookings = bookingRepository.findByBookerIdAndStatusOrderByEndDesc(
-                        userId, StatusBooking.WAITING, page).getContent();
+                        userId, StatusBooking.WAITING, page);
                 break;
 
             case REJECTED:
                 bookings = bookingRepository.findByBookerIdAndStatusOrderByEndDesc(
-                        userId, StatusBooking.REJECTED, page).getContent();
+                        userId, StatusBooking.REJECTED, page);
                 break;
         }
 
@@ -139,14 +139,14 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingOutDto getBookingById(Long userId, Long bookingId) {
+    public BookingOutDto getBookingById(Long bookingId, Long userId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new BookingNotFoundException("Бронирование с идентификатором " + bookingId + " не найдено."));
 
         if ((!booking.getBooker().getId().equals(userId)) &&
                 (!booking.getItem().getOwner().getId().equals(userId))) {
             throw new BookingOtherBookerException(String.format("Пользователь с id = " + userId +
-                    " не осуществлял бронирование с id = : " + bookingId));
+                    " не осуществлял бронирование с id = " + bookingId));
         }
 
         return BookingMapper.INSTANCE.toBookingOutDto(booking);
