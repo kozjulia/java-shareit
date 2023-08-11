@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item;
 
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.StatusBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -31,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -122,6 +125,59 @@ class ItemServiceImplTest {
                 null, null, Collections.EMPTY_LIST), equalTo(actualItem));
         InOrder inOrder = inOrder(itemRepository, commentRepository);
         inOrder.verify(itemRepository, times(1)).findById(itemId);
+        inOrder.verify(commentRepository, times(1)).findAllByItemId(itemId);
+    }
+
+    @Test
+    @DisplayName("получена вещь по ид, когда вещь найдена, тогда она возвращается с бронированиями")
+    void getItemById_whenItemFound_thenReturnedItemWithBookings() {
+        long userId = 0L;
+        User user = new User();
+        user.setId(userId);
+        long itemId = 0L;
+        Item expectedItem = new Item();
+        expectedItem.setId(itemId);
+        expectedItem.setOwner(user);
+
+        Booking lastBooking = new Booking();
+        lastBooking.setId(5L);
+        lastBooking.setStart(LocalDateTime.now());
+        lastBooking.setEnd(LocalDateTime.now().plusHours(1));
+        lastBooking.setStatus(StatusBooking.APPROVED);
+        lastBooking.setItem(expectedItem);
+        Booking nextBooking = new Booking();
+        nextBooking.setId(7L);
+        nextBooking.setStart(LocalDateTime.now());
+        nextBooking.setEnd(LocalDateTime.now().plusHours(2));
+        nextBooking.setStatus(StatusBooking.APPROVED);
+        nextBooking.setItem(expectedItem);
+
+        Comment comment = new Comment();
+        comment.setId(2L);
+        comment.setText("text");
+        comment.setCreated(LocalDateTime.now());
+        comment.setAuthor(user);
+        comment.setItem(expectedItem);
+
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(expectedItem));
+        when(bookingRepository.findFirstByItemIdAndStatusAndStartIsBefore(anyLong(), any(StatusBooking.class),
+                any(LocalDateTime.class), any(Sort.class))).thenReturn(Optional.of(lastBooking));
+        when(bookingRepository.findFirstByItemIdAndStatusAndStartIsAfter(anyLong(), any(StatusBooking.class),
+                any(LocalDateTime.class), any(Sort.class))).thenReturn(Optional.of(nextBooking));
+        when(commentRepository.findAllByItemId(anyLong())).thenReturn(Arrays.asList(comment));
+
+        ItemDto actualItem = itemService.getItemById(itemId, userId);
+
+        assertThat(ItemMapper.INSTANCE.toItemDtoOwner(expectedItem,
+                lastBooking, nextBooking, Arrays.asList(comment)), equalTo(actualItem));
+        InOrder inOrder = inOrder(itemRepository, bookingRepository, commentRepository);
+        inOrder.verify(itemRepository, times(1)).findById(itemId);
+        inOrder.verify(bookingRepository, times(1))
+                .findFirstByItemIdAndStatusAndStartIsBefore(anyLong(), any(StatusBooking.class),
+                        any(LocalDateTime.class), any(Sort.class));
+        inOrder.verify(bookingRepository, times(1))
+                .findFirstByItemIdAndStatusAndStartIsAfter(anyLong(), any(StatusBooking.class),
+                        any(LocalDateTime.class), any(Sort.class));
         inOrder.verify(commentRepository, times(1)).findAllByItemId(itemId);
     }
 
