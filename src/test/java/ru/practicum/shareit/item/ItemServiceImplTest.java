@@ -241,6 +241,22 @@ class ItemServiceImplTest {
     }
 
     @Test
+    @DisplayName("сохранена вещь, когда статус доступности не валиден, тогда выбрасывается исключение")
+    void saveItem_whenAvailableNotValid_thenExceptionThrown() {
+        ItemDto itemToSave = new ItemDto();
+        Long userId = 0L;
+
+        final ValidationException exception = assertThrows(ValidationException.class,
+                () -> itemService.saveItem(itemToSave, userId));
+
+        assertThat("Ошибка! Статус доступности вещи для аренды не может быть пустым. " +
+                "Код ошибки: 20001", equalTo(exception.getMessage()));
+        InOrder inOrder = inOrder(userRepository, itemRepository);
+        inOrder.verify(userRepository, never()).findById(userId);
+        inOrder.verify(itemRepository, never()).save(any(Item.class));
+    }
+
+    @Test
     @DisplayName("сохранена вещь, когда вещь не валидна, тогда выбрасывается исключение")
     void saveItem_whenItemNotValid_thenExceptionThrown() {
         ItemDto itemToSave = new ItemDto();
