@@ -11,22 +11,24 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long>, QuerydslPredicateExecutor<Booking> {
 
-    List<Booking> findByBookerIdOrderByEndDesc(Long bookerId);
+    List<Booking> findByBookerIdOrderByEndDesc(Long bookerId, Pageable page);
 
-    List<Booking> findByBookerIdAndStatusOrderByEndDesc(Long bookerId, StatusBooking status);
+    List<Booking> findByBookerIdAndStatusOrderByEndDesc(
+            Long bookerId, StatusBooking status, Pageable page);
 
-    List<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByEndDesc(Long bookerId,
-                                                                            LocalDateTime start,
-                                                                            LocalDateTime end);
+    List<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByEndDesc(
+            Long bookerId, LocalDateTime start, LocalDateTime end, Pageable page);
 
-    List<Booking> findByBookerIdAndEndIsBefore(Long bookerId, LocalDateTime end, Sort sort);
+    List<Booking> findByBookerIdAndEndIsBefore(Long bookerId, LocalDateTime end, Pageable page);
 
-    List<Booking> findByBookerIdAndEndIsAfter(Long bookerId, LocalDateTime end, Sort sort);
+    List<Booking> findByBookerIdAndEndIsAfter(
+            Long bookerId, LocalDateTime end, Pageable page);
 
     Optional<Booking> findFirstByItemIdAndStatusAndStartIsBefore(Long itemId, StatusBooking status,
                                                                  LocalDateTime end, Sort sort);
