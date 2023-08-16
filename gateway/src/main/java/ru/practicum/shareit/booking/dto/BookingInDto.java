@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking.dto;
 
-import ru.practicum.shareit.booking.model.StatusBooking;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import static ru.practicum.shareit.utils.Constants.PATTERN_FOR_BOOKING;
@@ -9,10 +8,8 @@ import java.time.LocalDateTime;
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 
-import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-@Data
 public class BookingInDto {
 
     private Long id;

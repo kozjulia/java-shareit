@@ -9,7 +9,6 @@ import java.util.List;
 import javax.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/bookings")
-@Slf4j
 public class BookingController {
 
     private final BookingService bookingService;
@@ -32,8 +30,6 @@ public class BookingController {
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size) {
         List<BookingOutDto> bookingOutDtos = bookingService.getAllBookingsByUser(userId, state, from, size);
-        log.info("Получен список всех бронирований текущего пользователя с id = {}, количество = {}.",
-                userId, bookingOutDtos.size());
         return ResponseEntity.ok().body(bookingOutDtos);
     }
 
@@ -47,8 +43,6 @@ public class BookingController {
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size) {
         List<BookingOutDto> bookingOutDtos = bookingService.getAllBookingsAllItemsByOwner(userId, state, from, size);
-        log.info("Получен список всех бронирований для всех вещей владельца с id = {}, " +
-                "количество = {}.", userId, bookingOutDtos.size());
         return ResponseEntity.ok().body(bookingOutDtos);
     }
 
@@ -60,7 +54,6 @@ public class BookingController {
             @PathVariable Long bookingId,
             @RequestHeader("X-Sharer-User-Id") Long userId) {
         BookingOutDto bookingOutDto = bookingService.getBookingById(bookingId, userId);
-        log.info("Получено бронирование с id = {}.", bookingId);
         return ResponseEntity.ok(bookingOutDto);
     }
 
@@ -73,7 +66,6 @@ public class BookingController {
             @Valid @RequestBody BookingInDto bookingInDto,
             @RequestHeader("X-Sharer-User-Id") Long userId) {
         BookingOutDto bookingOutDto = bookingService.saveBooking(bookingInDto, userId);
-        log.info("Добавлен новый запрос на бронирование: {}", bookingOutDto);
         return ResponseEntity.ok(bookingOutDto);
     }
 
@@ -85,7 +77,6 @@ public class BookingController {
             @PathVariable Long bookingId, @RequestParam Boolean approved,
             @RequestHeader("X-Sharer-User-Id") Long userId) {
         BookingOutDto bookingOutDto = bookingService.updateBooking(bookingId, approved, userId);
-        log.info("Обновлено бронирование: {}.", bookingOutDto);
         return ResponseEntity.ok(bookingOutDto);
     }
 

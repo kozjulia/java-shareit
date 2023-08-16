@@ -1,92 +1,72 @@
 package ru.practicum.shareit.booking;
 
 import ru.practicum.shareit.booking.dto.BookingInDto;
-import ru.practicum.shareit.booking.dto.BookingOutDto;
-import ru.practicum.shareit.booking.model.StateBooking;
-import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.booking.dto.StateBooking;
 
-import java.util.List;
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 @RequestMapping(path = "/bookings")
 @Slf4j
+@Validated
 public class BookingController {
 
-    private final BookingService bookingService;
+    private final BookingClient bookingClient;
 
     @GetMapping
-    /**
-     * Получение списка всех бронирований текущего пользователя
-     */
-    public ResponseEntity<List<BookingOutDto>> getAllBookingsByUser(
+    public ResponseEntity<Object> getAllBookingsByUser(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(defaultValue = "ALL") StateBooking state,
-            @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size) {
-        List<BookingOutDto> bookingOutDtos = bookingService.getAllBookingsByUser(userId, state, from, size);
-        log.info("Получен список всех бронирований текущего пользователя с id = {}, количество = {}.",
-                userId, bookingOutDtos.size());
-        return ResponseEntity.ok().body(bookingOutDtos);
+            @RequestParam(name = "state", defaultValue = "ALL") StateBooking state,
+            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+        log.info("Получен список всех бронирований текущего пользователя с id = {}, state = {}, " +
+                "from = {}, size = {}.", userId, state, from, size);
+        return bookingClient.getAllBookingsByUser(userId, state, from, size);
     }
 
     @GetMapping("/owner")
-    /**
-     * Получение списка бронирований для всех вещей владельца
-     */
-    public ResponseEntity<List<BookingOutDto>> getAllBookingsAllItemsByOwner(
+    public ResponseEntity<Object> getAllBookingsAllItemsByOwner(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(defaultValue = "ALL") StateBooking state,
-            @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size) {
-        List<BookingOutDto> bookingOutDtos = bookingService.getAllBookingsAllItemsByOwner(userId, state, from, size);
-        log.info("Получен список всех бронирований для всех вещей владельца с id = {}, " +
-                "количество = {}.", userId, bookingOutDtos.size());
-        return ResponseEntity.ok().body(bookingOutDtos);
+            @RequestParam(name = "state", defaultValue = "ALL") StateBooking state,
+            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+        log.info("Получен список всех бронирований для всех вещей владельца с id = {}, state = {}, " +
+                "from = {}, size = {}.", userId, state, from, size);
+        return bookingClient.getAllBookingsAllItemsByOwner(userId, state, from, size);
     }
 
     @GetMapping("/{bookingId}")
-    /**
-     * Получение данных о конкретном бронировании
-     */
-    public ResponseEntity<BookingOutDto> getBookingById(
-            @PathVariable Long bookingId,
-            @RequestHeader("X-Sharer-User-Id") Long userId) {
-        BookingOutDto bookingOutDto = bookingService.getBookingById(bookingId, userId);
-        log.info("Получено бронирование с id = {}.", bookingId);
-        return ResponseEntity.ok(bookingOutDto);
+    public ResponseEntity<Object> getBookingById(
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @PathVariable Long bookingId) {
+        log.info("Получено бронирование с id = {}, userId={}.", bookingId, userId);
+        return bookingClient.getBooking(bookingId, userId);
     }
 
     @PostMapping
-    @Validated
-    /**
-     * Добавление нового запроса на бронирование
-     */
-    public ResponseEntity<BookingOutDto> saveBooking(
-            @Valid @RequestBody BookingInDto bookingInDto,
-            @RequestHeader("X-Sharer-User-Id") Long userId) {
-        BookingOutDto bookingOutDto = bookingService.saveBooking(bookingInDto, userId);
-        log.info("Добавлен новый запрос на бронирование: {}", bookingOutDto);
-        return ResponseEntity.ok(bookingOutDto);
+    public ResponseEntity<Object> saveBooking(
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @Valid @RequestBody BookingInDto bookingInDto) {
+        log.info("Добавлен новый запрос на бронирование: {}, userId={}.", bookingInDto, userId);
+        return bookingClient.saveBooking(userId, bookingInDto);
     }
 
     @PatchMapping("/{bookingId}")
-    /**
-     * Подтверждение или отклонение запроса на бронирование
-     */
-    public ResponseEntity<BookingOutDto> updateBooking(
-            @PathVariable Long bookingId, @RequestParam Boolean approved,
-            @RequestHeader("X-Sharer-User-Id") Long userId) {
-        BookingOutDto bookingOutDto = bookingService.updateBooking(bookingId, approved, userId);
-        log.info("Обновлено бронирование: {}.", bookingOutDto);
-        return ResponseEntity.ok(bookingOutDto);
+    public ResponseEntity<Object> updateBooking(
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @PathVariable Long bookingId, @RequestParam Boolean approved) {
+        log.info("Обновлено бронирование с id = {}, userId={}, approved = {}.", bookingId, userId, approved);
+        return bookingClient.updateBooking(userId, bookingId, approved);
     }
 
 }
