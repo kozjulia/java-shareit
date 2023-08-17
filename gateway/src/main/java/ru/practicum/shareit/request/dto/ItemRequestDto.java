@@ -7,9 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class ItemRequestDto {
 
     private Long id;

@@ -1,15 +1,14 @@
 package ru.practicum.shareit.request;
 
 import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.service.ItemRequestService;
 
-import java.util.List;
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,58 +17,40 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class ItemRequestController {
 
-    private final ItemRequestService itemRequestService;
+    private final ItemRequestClient itemRequestClient;
 
     @GetMapping
-    /**
-     * Получение списка своих запросов вместе с данными об ответах на них
-     */
-    public ResponseEntity<List<ItemRequestDto>> getAllItemRequestsByUser(
+    public ResponseEntity<Object> getAllItemRequestsByUser(
             @RequestHeader("X-Sharer-User-Id") Long userId) {
-        List<ItemRequestDto> itemRequestDtos = itemRequestService.getAllItemRequestsByUser(userId);
         log.info("Получен список запросов текущего пользователя вместе с данными об ответах " +
-                "на них с id = {}, количество = {}.", userId, itemRequestDtos.size());
-        return ResponseEntity.ok().body(itemRequestDtos);
+                "на них с id = {}.", userId);
+        return itemRequestClient.getAllItemRequestsByUser(userId);
     }
 
     @GetMapping("/all")
-    /**
-     * Получение списка запросов, созданных другими пользователями
-     */
-    public ResponseEntity<List<ItemRequestDto>> getAllItemRequestsByOtherUsers(
+    public ResponseEntity<Object> getAllItemRequestsByOtherUsers(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size) {
-        List<ItemRequestDto> itemRequestDtos = itemRequestService
-                .getAllItemRequestsByOtherUsers(userId, from, size);
+            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
         log.info("Получен список запросов пользователя с id = {}, созданных другими, " +
-                "количество = {}.", userId, itemRequestDtos.size());
-        return ResponseEntity.ok().body(itemRequestDtos);
+                ", from = {}, size = {}.", userId, from, size);
+        return itemRequestClient.getAllItemRequestsByOtherUsers(userId, from, size);
     }
 
     @GetMapping("/{requestId}")
-    /**
-     * Получение данных об одном конкретном запросе вместе с данными об ответах
-     */
-    public ResponseEntity<ItemRequestDto> getItemRequestById(
-            @PathVariable Long requestId,
-            @RequestHeader("X-Sharer-User-Id") Long userId) {
-        ItemRequestDto itemRequestDto = itemRequestService.getItemRequestById(requestId, userId);
-        log.info("Получен запрос с id = {}.", requestId);
-        return ResponseEntity.ok(itemRequestDto);
+    public ResponseEntity<Object> getItemRequestById(
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @PathVariable Long requestId) {
+        log.info("Получен запрос с id = {}, userId={}.", requestId, userId);
+        return itemRequestClient.getItemRequestById(userId, requestId);
     }
 
     @PostMapping
-    @Validated
-    /**
-     * Добавление нового запроса вещи
-     */
-    public ResponseEntity<ItemRequestDto> saveItemRequest(
-            @Valid @RequestBody ItemRequestDto itemRequestDto,
-            @RequestHeader("X-Sharer-User-Id") Long userId) {
-        itemRequestDto = itemRequestService.saveItemRequest(itemRequestDto, userId);
+    public ResponseEntity<Object> saveItemRequest(
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @Valid @RequestBody ItemRequestDto itemRequestDto) {
         log.info("Добавлен новый запрос на бронирование: {}", itemRequestDto);
-        return ResponseEntity.ok(itemRequestDto);
+        return itemRequestClient.saveItemRequest(userId, itemRequestDto);
     }
 
 }

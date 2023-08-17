@@ -3,9 +3,9 @@ package ru.practicum.shareit.user.dto;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class UserDto {
 
     private Long id;

@@ -2,6 +2,9 @@ package ru.practicum.shareit.item.dto;
 
 import javax.validation.constraints.NotEmpty;
 
+import lombok.Getter;
+
+@Getter
 public class ItemDto {
 
     private Long id;

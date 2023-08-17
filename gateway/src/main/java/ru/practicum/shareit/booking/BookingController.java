@@ -50,7 +50,7 @@ public class BookingController {
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @PathVariable Long bookingId) {
         log.info("Получено бронирование с id = {}, userId={}.", bookingId, userId);
-        return bookingClient.getBooking(bookingId, userId);
+        return bookingClient.getBooking(userId, bookingId);
     }
 
     @PostMapping
