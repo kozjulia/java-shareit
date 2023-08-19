@@ -17,7 +17,7 @@
 
 Микросервисное приложение написано на **Java**, использует **Spring Boot**, **Maven**, **Hibernate**, **JUnit 5**, 
 **Mockito**, **Docker**, API соответствует **REST**, данные хранятся в БД **PostgreSQL**, **H2**.
-Тестовое покрытие кода - 92% строк кода. Пример кода:
+Тестовое покрытие кода - 94% строк кода. Пример кода:
 ```java
 public class Main {
     public static void main(String[] args) {

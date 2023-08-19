@@ -33,6 +33,7 @@ import org.mockito.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -263,12 +264,12 @@ class ItemServiceImplTest {
         Long userId = 0L;
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(new User()));
         when(itemRepository.save(any(Item.class)))
-                .thenThrow(new ItemNotSaveException("Вещь не была создана"));
+                .thenThrow(new DataIntegrityViolationException("Вещь не была создана"));
 
         final ItemNotSaveException exception = assertThrows(ItemNotSaveException.class,
                 () -> itemService.saveItem(userId, itemToSave));
 
-        assertThat("Вещь не была создана", equalTo(exception.getMessage()));
+        assertThat("Вещь не была создана: " + itemToSave, equalTo(exception.getMessage()));
         InOrder inOrder = inOrder(userRepository, itemRepository);
         inOrder.verify(userRepository, times(1)).findById(userId);
         inOrder.verify(itemRepository, times(1)).save(any(Item.class));
@@ -399,15 +400,16 @@ class ItemServiceImplTest {
         Long itemId = 0L;
         Item oldItem = new Item();
         oldItem.setOwner(user);
+        ItemDto itemDto = new ItemDto();
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(oldItem));
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(new User()));
         when(itemRepository.saveAndFlush(any(Item.class)))
-                .thenThrow(new ItemNotUpdateException("Вещь не была обновлена"));
+                .thenThrow(new DataIntegrityViolationException("Вещь не была обновлена"));
 
         final ItemNotUpdateException exception = assertThrows(ItemNotUpdateException.class,
-                () -> itemService.updateItem(userId, itemId, new ItemDto()));
+                () -> itemService.updateItem(userId, itemId, itemDto));
 
-        assertThat("Вещь не была обновлена", equalTo(exception.getMessage()));
+        assertThat("Вещь с id = 0 не была обновлена: " + itemDto, equalTo(exception.getMessage()));
         InOrder inOrder = inOrder(userRepository, itemRepository);
         verify(itemRepository, times(1)).findById(anyLong());
         inOrder.verify(userRepository, times(1)).findById(userId);
@@ -532,12 +534,12 @@ class ItemServiceImplTest {
         when(bookingRepository.isFindBooking(anyLong(), anyLong(), any(LocalDateTime.class)))
                 .thenReturn(0L);
         when(commentRepository.save(any(Comment.class)))
-                .thenThrow(new CommentNotSaveException("Комментарий не был создан"));
+                .thenThrow(new DataIntegrityViolationException("Комментарий не был создан"));
 
         final CommentNotSaveException exception = assertThrows(CommentNotSaveException.class,
                 () -> itemService.saveComment(userId, itemId, commentToSave));
 
-        assertThat("Комментарий не был создан", equalTo(exception.getMessage()));
+        assertThat("Комментарий не был создан: " + commentToSave, equalTo(exception.getMessage()));
         InOrder inOrder = inOrder(itemRepository, userRepository, bookingRepository, commentRepository);
         inOrder.verify(itemRepository, times(1)).findById(itemId);
         inOrder.verify(userRepository, times(1)).findById(userId);

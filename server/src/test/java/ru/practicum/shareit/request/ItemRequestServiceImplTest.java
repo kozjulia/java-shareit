@@ -22,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -222,12 +223,12 @@ class ItemRequestServiceImplTest {
         ItemRequestDto itemRequestToSave = new ItemRequestDto();
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(new User()));
         when(itemRequestRepository.save(any(ItemRequest.class)))
-                .thenThrow(new ItemRequestNotSaveException("Запрос не был создан"));
+                .thenThrow(new DataIntegrityViolationException("Запрос не был создан"));
 
         final ItemRequestNotSaveException exception = assertThrows(ItemRequestNotSaveException.class,
                 () -> itemRequestService.saveItemRequest(userId, itemRequestToSave));
 
-        assertThat("Запрос не был создан", equalTo(exception.getMessage()));
+        assertThat("Запрос вещи не был создан: " + itemRequestToSave, equalTo(exception.getMessage()));
         InOrder inOrder = inOrder(userRepository, itemRequestRepository);
         inOrder.verify(userRepository, times(1)).findById(anyLong());
         inOrder.verify(itemRequestRepository, times(1)).save(any(ItemRequest.class));

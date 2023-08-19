@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -99,12 +100,13 @@ class UserServiceImplTest {
     void saveUser_whenUserNotValid_thenExceptionThrown() {
         UserDto userToSave = new UserDto();
         when(userRepository.save(any(User.class)))
-                .thenThrow(new UserNotSaveException("Пользователь не был создан"));
+                .thenThrow(new DataIntegrityViolationException("Пользователь не был создан"));
 
         final UserNotSaveException exception = assertThrows(UserNotSaveException.class,
                 () -> userService.saveUser(userToSave));
 
-        assertThat("Пользователь не был создан", equalTo(exception.getMessage()));
+        assertThat("Пользователь не был создан: " + userToSave,
+                equalTo(exception.getMessage()));
         verify(userRepository, times(1)).save(any(User.class));
     }
 
@@ -136,14 +138,16 @@ class UserServiceImplTest {
     void updateUser_whenUserNotValid_thenExceptionThrown() {
         Long userId = 0L;
         User oldUser = new User();
+        UserDto userDto = new UserDto();
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(oldUser));
         when(userRepository.saveAndFlush(any(User.class)))
-                .thenThrow(new UserNotUpdateException("Пользователь не был обновлен"));
+                .thenThrow(new DataIntegrityViolationException("Пользователь не был обновлен"));
 
         final UserNotUpdateException exception = assertThrows(UserNotUpdateException.class,
-                () -> userService.updateUser(userId, new UserDto()));
+                () -> userService.updateUser(userId, userDto));
 
-        assertThat("Пользователь не был обновлен", equalTo(exception.getMessage()));
+        assertThat("Пользователь с id = 0 не был обновлён: " + userDto,
+                equalTo(exception.getMessage()));
         verify(userRepository, times(1)).findById(anyLong());
         verify(userRepository, times(1)).saveAndFlush(any(User.class));
     }

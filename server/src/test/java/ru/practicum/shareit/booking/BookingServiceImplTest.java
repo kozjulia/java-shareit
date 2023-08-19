@@ -37,6 +37,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.dao.DataIntegrityViolationException;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -621,12 +622,12 @@ class BookingServiceImplTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
         when(bookingRepository.save(any(Booking.class)))
-                .thenThrow(new BookingNotSaveException("Бронирование не было создано"));
+                .thenThrow(new DataIntegrityViolationException("Бронирование не было создано"));
 
         final BookingNotSaveException exception = assertThrows(BookingNotSaveException.class,
                 () -> bookingService.saveBooking(userId, bookingToSave));
 
-        assertThat("Бронирование не было создано", equalTo(exception.getMessage()));
+        assertThat("Бронирование не было создано: " + bookingToSave, equalTo(exception.getMessage()));
         InOrder inOrder = inOrder(userRepository, itemRepository, bookingRepository);
         inOrder.verify(userRepository, times(1)).findById(anyLong());
         inOrder.verify(itemRepository, times(1)).findById(anyLong());
@@ -781,12 +782,13 @@ class BookingServiceImplTest {
         oldBooking.setStatus(StatusBooking.WAITING);
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(oldBooking));
         when(bookingRepository.saveAndFlush(any(Booking.class)))
-                .thenThrow(new BookingNotUpdateException("Бронирование не было обновлено"));
+                .thenThrow(new DataIntegrityViolationException("Бронирование не было обновлено"));
 
         final BookingNotUpdateException exception = assertThrows(BookingNotUpdateException.class,
                 () -> bookingService.updateBooking(userId, bookingId, true));
 
-        assertThat("Бронирование не было обновлено", equalTo(exception.getMessage()));
+        assertThat("Бронирование с id = 0 не было отклонено или подтверждено.",
+                equalTo(exception.getMessage()));
         verify(bookingRepository, times(1)).findById(anyLong());
         verify(bookingRepository, times(1)).saveAndFlush(any(Booking.class));
     }
